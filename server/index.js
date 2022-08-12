@@ -25,6 +25,7 @@ io.on("connection", (socket) => {
   socket.on("disconnect", () => {
     console.log("user disconnected");
   });
+
   socket.on("message", (msg, room) => {
     console.log(msg, room);
     console.log("socket id: ", socket.id);
@@ -41,6 +42,8 @@ io.on("connection", (socket) => {
   });
 
   socket.on("join", (msg, room) => {
+    console.log("joining...");
+    console.log("join", msg, room);
     console.log("trying to join");
     let rooms = io.sockets.adapter.rooms;
     let roomsize = rooms.get(room);
@@ -48,15 +51,30 @@ io.on("connection", (socket) => {
     if (roomsize === undefined) {
       console.log("welcome first");
       socket.join(room);
+      socket.emit("success", "joined the room succesfully (1)", 1);
     }
     if (roomsize !== undefined) {
       console.log(roomsize.size);
       if (roomsize.size > 1) {
         console.log("room is full");
+        socket.emit("error", "this room is already full");
       } else {
         console.log("welcome second");
         socket.join(room);
+        socket.emit("success", "joined the room succesfully (2)", 2);
       }
     }
+  });
+
+  socket.on("gameMessage", (data) => {
+    console.log("got game updata from socketid: ", socket.id);
+    let roomName = data.roomName;
+    if (io.sockets.adapter.rooms.get(roomName).has(socket.id)) {
+      socket.to(roomName).emit("gameUpdate", data);
+    }
+  });
+
+  socket.on("greet", () => {
+    console.log("greetings");
   });
 });

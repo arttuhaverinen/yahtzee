@@ -11,22 +11,29 @@ import dice6 from "./images/dice6.png";
 import io, { Socket } from "socket.io-client";
 import MainMenu from "./components/MainMenu";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import { BrowserRouter as Router, Route, Routes, useLocation } from "react-router-dom";
 import NavBar from "./components/Navbar";
 import Footer from "./components/Footer";
 import SearchingMenu from "./components/SearchingMenu";
 import { Link } from "react-router-dom";
 import { faDice } from "@fortawesome/free-solid-svg-icons";
 import OnlineMenu from "./components/OnlineMenu";
+import MultiplayerGame from "./components/MultiplayerGame";
+import Game from "./components/Game";
 
 function App() {
   const [dices, setDices] = useState(() => [0, 0, 0, 0, 0]);
   const diceImages = [dice0, dice1, dice2, dice3, dice4, dice5, dice6];
   const diceIds = ["dice1pic", "dice2pic", "dice3pic", "dice4pic", "dice5pic"];
-  //const [pair, setPair] = useState({ valuesP1: 0, sum: 0 });
+
+  const [config, setConfig] = useState({
+    singlePlayerMode: false,
+    onlineMode: false,
+  });
   const [test, setTest] = useState(0);
   const [onlineMode, setOnlineMode] = useState(false);
-  const [roomName, setRoomName] = useState();
+  const [roomName, setRoomName] = useState(null);
+  const [username, setUserName] = useState(null);
   const [multiplayerPlayer1, setMultiplayerPlayer1] = useState(false);
   const [multiplayerPlayer2, setMultiplayerPlayer2] = useState(false);
   const [socket, setSocket] = useState(null);
@@ -36,10 +43,6 @@ function App() {
   const [disableScoreDivP1, setDisableScoreDivP1] = useState(true);
   const [disableScoreDivP2, setDisableScoreDivP2] = useState(true);
 
-  const [config, setConfig] = useState({
-    singlePlayerMode: false,
-    onlineMode: false,
-  });
   const [turn, setTurn] = useState(1);
   const [roll, setRoll] = useState(0);
 
@@ -155,6 +158,7 @@ function App() {
   });
 
   useEffect(() => {
+    console.log("data rerender");
     if (socket !== null) {
       socket.on("message", (data) => {
         alert(data);
@@ -162,8 +166,46 @@ function App() {
       socket.on("send_message", (data) => {
         alert(data);
       });
+      socket.on("error", (data) => {
+        alert(data);
+      });
+      socket.on("success", (data, player) => {
+        alert(data);
+        if (player === 1) {
+          setMultiplayerPlayer1(true);
+          setMultiplayerPlayer2(false);
+        } else if (player === 2) {
+          setMultiplayerPlayer2(true);
+          setMultiplayerPlayer1(false);
+        }
+      });
+      socket.on("gameUpdate", (data) => {
+        console.log("data");
+        setAces(data.aces);
+        setTwos(data.twos);
+        setThrees(data.threes);
+        setFours(data.fours);
+        setFives(data.fives);
+        setSixes(data.sixes);
+        setaltPair(data.altPair);
+        setTwoPairs(data.twoPairs);
+        setTriple(data.triple);
+        setFourOfaKind(data.fourOfaKind);
+        setSmallStraight(data.smallStraight);
+        setBigStraight(data.bigStraight);
+        setFullHouse(data.fullHouse);
+        setChance(data.chance);
+        setYatzy(data.yatzy);
+        setDices(data.dices);
+        setRoll(data.roll);
+        setTurn(data.turn);
+        if (data.turnChange) {
+          console.log("data resetting dices");
+          setDices([0, 0, 0, 0, 0]);
+        }
+      });
     }
-  });
+  }, [socket]);
 
   useEffect(() => {
     action();
@@ -182,6 +224,51 @@ function App() {
     console.log("rerender");
     calculateFirstTotal();
   }, [bonus]);
+
+  useEffect(() => {
+    if (multiplayerPlayer1 === true && turn === 1) {
+      sendGameStates(false);
+    }
+    if (multiplayerPlayer2 === true && turn === 2) {
+      sendGameStates(false);
+    }
+  });
+
+  useEffect(() => {
+    sendGameStates(true);
+  }, [turn]);
+
+  const sendGameStates = (resetDices) => {
+    if (socket !== null && roomName !== null) {
+      let turnChange = resetDices;
+      socket.emit("gameMessage", {
+        aces,
+        twos,
+        threes,
+        fours,
+        fives,
+        sixes,
+        altPair,
+        twoPairs,
+        triple,
+        fourOfaKind,
+        smallStraight,
+        bigStraight,
+        fullHouse,
+        chance,
+        yatzy,
+
+        roomName,
+        dices,
+        roll,
+        turn,
+        turnChange,
+      });
+    }
+  };
+
+  //let location = useLocation();
+  //console.log("loc", location);
 
   //const dicesTobeDeleted = [dice1pic = useRef()]
   //const dice1pic = useRef()
@@ -677,11 +764,11 @@ function App() {
     } else {
       howManyRolls = 3;
       setRoll(0);
-      if (config.singlePlayerMode === false) {
-        setTurn(turn === 1 ? 2 : 1);
-        disablePlayer1Divs();
-      }
+      //if (config.singlePlayerMode === false) {
+      setTurn(turn === 1 ? 2 : 1);
+      disablePlayer1Divs();
     }
+    //}
   };
 
   const setScoreDivUnactive = (e) => {
@@ -714,6 +801,36 @@ function App() {
       }
     }
     */
+  };
+
+  const handleScoreVisibility = () => {
+    if (multiplayerPlayer1 && turn === 1) {
+      return "Score";
+    }
+    if (multiplayerPlayer1 && turn === 2) {
+      return "Score-unclickable";
+    }
+    if (multiplayerPlayer2 && turn === 1) {
+      return "Score-unclickable";
+    }
+    if (multiplayerPlayer2 && turn === 2) {
+      return "Score";
+    }
+  };
+
+  const handleDiceVisibility = () => {
+    if (multiplayerPlayer1 && turn === 1) {
+      return "Dices";
+    }
+    if (multiplayerPlayer1 && turn === 2) {
+      return "Dices Dices-unclickable";
+    }
+    if (multiplayerPlayer2 && turn === 1) {
+      return "Dices Dices-unclickable";
+    }
+    if (multiplayerPlayer2 && turn === 2) {
+      return "Dices";
+    }
   };
 
   const randomDice = () => {
@@ -760,27 +877,9 @@ function App() {
     if (!(chance.lockedP1 && fullHouse.lockedP2)) isChance();
   };
 
-  const handleJoinOnline = (e) => {
-    e.preventDefault();
-
-    if (socket == null) {
-      const getSocket = io.connect("http://localhost:3001/");
-      setSocket(getSocket);
-      getSocket.emit("join", "im joining room", roomName);
-    }
-    fetch("http://localhost:3001/join-online", {
-      method: "POST",
-      body: roomName,
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        alert("joined online?");
-      })
-      .catch((err) => alert("error: ", err));
-  };
-
   return (
     <Router>
+      {console.log("bonus", bonus)}
       <div className="App">
         <NavBar />
         {/*
@@ -795,68 +894,119 @@ function App() {
         <br></br>
         roll {roll} */}
         <Routes>
+          {console.log("location ", window.location.pathname)}
           <Route path="/" element={<MainMenu />} />
-          <Route path="/online-menu" element={<OnlineMenu />} />
+          <Route path="/online-menu" element={<OnlineMenu roomName={roomName} setRoomName={setRoomName} username={username} setUsername={setUserName} socket={socket} setSocket={setSocket} />} />
           <Route path="/searching-menu" element={<SearchingMenu />} />
           <Route
             path="/game"
             element={
-              <div className="pageGrid container">
-                <div className="Score">
-                  <ScoreDiv combinationName={"Aces"} combination={aces} setCombination={setAces} setScoreDivUnactive={setScoreDivUnactive} calculateSum={calculateSum} config={config} setRoll={setRoll} setDice={setDices} handleTurnChange={handleTurnChange} turn={turn} />
-                  <ScoreDiv combinationName={"Twos"} combination={twos} setCombination={setTwos} setScoreDivUnactive={setScoreDivUnactive} calculateSum={calculateSum} config={config} setRoll={setRoll} setDice={setDices} handleTurnChange={handleTurnChange} turn={turn} />
-                  <ScoreDiv combinationName={"Threes"} combination={threes} setCombination={setThrees} setScoreDivUnactive={setScoreDivUnactive} calculateSum={calculateSum} config={config} setRoll={setRoll} setDice={setDices} handleTurnChange={handleTurnChange} turn={turn} />
-                  <ScoreDiv combinationName={"Fours"} combination={fours} setCombination={setFours} setScoreDivUnactive={setScoreDivUnactive} calculateSum={calculateSum} config={config} setRoll={setRoll} setDice={setDices} handleTurnChange={handleTurnChange} turn={turn} />
-                  <ScoreDiv combinationName={"Fives"} combination={fives} setCombination={setFives} setScoreDivUnactive={setScoreDivUnactive} calculateSum={calculateSum} config={config} setRoll={setRoll} setDice={setDices} handleTurnChange={handleTurnChange} turn={turn} />
-                  <ScoreDiv combinationName={"Sixes"} combination={sixes} setCombination={setSixes} setScoreDivUnactive={setScoreDivUnactive} calculateSum={calculateSum} config={config} setRoll={setRoll} setDice={setDices} handleTurnChange={handleTurnChange} turn={turn} />
-                  <div className="scoreDiv">
-                    <h3>Bonus</h3>
-                    <h3>{bonus.valuesP1}</h3>
-                    <h3>{bonus.valuesP2}</h3>
-                  </div>
-                  <div className="scoreDiv">
-                    <h3>Sum</h3>
-                    <h3>{firstTotal.valuesP1}</h3>
-                    <h3>{firstTotal.valuesP2}</h3>
-                  </div>
-                  <br />
-                  <ScoreDiv combinationName={"Pair"} combination={altPair} setCombination={setaltPair} setScoreDivUnactive={setScoreDivUnactive} calculateSum={calculateSum} config={config} setRoll={setRoll} setDice={setDices} handleTurnChange={handleTurnChange} turn={turn} />
-                  <ScoreDiv combinationName={"Two pair"} combination={twoPairs} setCombination={setTwoPairs} setScoreDivUnactive={setScoreDivUnactive} calculateSum={calculateSum} config={config} setRoll={setRoll} setDice={setDices} handleTurnChange={handleTurnChange} turn={turn} />
-                  <ScoreDiv combinationName={"3 of a kind"} combination={triple} setCombination={setTriple} setScoreDivUnactive={setScoreDivUnactive} calculateSum={calculateSum} config={config} setRoll={setRoll} setDice={setDices} handleTurnChange={handleTurnChange} turn={turn} />
-                  <ScoreDiv combinationName={"4 of a kind"} combination={fourOfaKind} setCombination={setFourOfaKind} setScoreDivUnactive={setScoreDivUnactive} calculateSum={calculateSum} config={config} setRoll={setRoll} setDice={setDices} handleTurnChange={handleTurnChange} turn={turn} />
-                  <ScoreDiv combinationName={"Small straight"} combination={smallStraight} setCombination={setSmallStraight} setScoreDivUnactive={setScoreDivUnactive} calculateSum={calculateSum} config={config} setRoll={setRoll} setDice={setDices} handleTurnChange={handleTurnChange} turn={turn} />
-                  <ScoreDiv combinationName={"Big straight"} combination={bigStraight} setCombination={setBigStraight} setScoreDivUnactive={setScoreDivUnactive} calculateSum={calculateSum} config={config} setRoll={setRoll} setDice={setDices} handleTurnChange={handleTurnChange} turn={turn} />
-                  <ScoreDiv combinationName={"Full house"} combination={fullHouse} setCombination={setFullHouse} setScoreDivUnactive={setScoreDivUnactive} calculateSum={calculateSum} config={config} setRoll={setRoll} setDice={setDices} handleTurnChange={handleTurnChange} turn={turn} />
-                  <ScoreDiv combinationName={"Chance"} combination={chance} setCombination={setChance} setScoreDivUnactive={setScoreDivUnactive} calculateSum={calculateSum} config={config} setRoll={setRoll} setDice={setDices} handleTurnChange={handleTurnChange} turn={turn} />
-                  <ScoreDiv combinationName={"Yatzy"} combination={yatzy} setCombination={setYatzy} setScoreDivUnactive={setScoreDivUnactive} calculateSum={calculateSum} config={config} setRoll={setRoll} setDice={setDices} handleTurnChange={handleTurnChange} turn={turn} />
-
-                  <div className="scoreDiv">
-                    <h3>Total</h3>
-                    <h3>{finalTotal.valuesP1}</h3>
-                    <h3>{finalTotal.valuesP2}</h3>
-                  </div>
-                </div>
-                <div className="Dices">
-                  <button
-                    style={roll % 3 !== 0 || roll === 0 ? { color: "green" } : { pointerEvents: "none" }}
-                    onClick={() => {
-                      diceRoll();
-                    }}
-                  >
-                    {roll % 3 !== 0 || roll === 0 ? <>roll {showRollIcons()}</> : <p>not available</p>}
-                  </button>
-                  <div>
-                    <img id="dice1pic" onMouseOver={(e) => keepDiceAction(e)} src={diceImages[dices[0]]}></img>
-                    <img id="dice2pic" onMouseOver={(e) => keepDiceAction(e)} src={diceImages[dices[1]]}></img>
-                    <img id="dice3pic" onMouseOver={(e) => keepDiceAction(e)} src={diceImages[dices[2]]}></img>
-                    <img id="dice4pic" onMouseOver={(e) => keepDiceAction(e)} src={diceImages[dices[3]]}></img>
-                    <img id="dice5pic" onMouseOver={(e) => keepDiceAction(e)} src={diceImages[dices[4]]}></img>
-                  </div>
-                  <button className="btnBackToMainMenu">
-                    <Link to="/">Back to main menu</Link>{" "}
-                  </button>
-                </div>
-              </div>
+              <Game
+                aces={aces}
+                twos={twos}
+                threes={threes}
+                fours={fours}
+                fives={fives}
+                sixes={sixes}
+                setAces={setAces}
+                setTwos={setTwos}
+                setThrees={setThrees}
+                setFours={setFours}
+                setFives={setFives}
+                setSixes={setSixes}
+                altPair={altPair}
+                twoPairs={twoPairs}
+                triple={triple}
+                fourOfaKind={fourOfaKind}
+                fullHouse={fullHouse}
+                chance={chance}
+                yatzy={yatzy}
+                setScoreDivUnactive={setScoreDivUnactive}
+                bonus={bonus}
+                setBonus={setBonus}
+                firstTotal={firstTotal}
+                handleScoreVisibility={handleScoreVisibility}
+                handleTurnChange={handleTurnChange}
+                turn={turn}
+                config={config}
+                setRoll={setRoll}
+                calculateSum={calculateSum}
+                setDices={setDices}
+                setaltPair={setaltPair}
+                finalTotal={finalTotal}
+                handleDiceVisibility={handleDiceVisibility}
+                roll={roll}
+                diceRoll={diceRoll}
+                showRollIcons={showRollIcons}
+                keepDiceAction={keepDiceAction}
+                diceImages={diceImages}
+                dices={dices}
+                smallStraight={smallStraight}
+                bigStraight={bigStraight}
+                setTwoPairs={setTwoPairs}
+                setTriple={setTriple}
+                setFourOfaKind={setFourOfaKind}
+                setBigStraight={setBigStraight}
+                setFullHouse={setFullHouse}
+                setChance={setChance}
+                setYatzy={setYatzy}
+                setSmallStraight={setSmallStraight}
+              />
+            }
+          />
+          <Route
+            path="/mp-game"
+            element={
+              <MultiplayerGame
+                aces={aces}
+                twos={twos}
+                threes={threes}
+                fours={fours}
+                fives={fives}
+                sixes={sixes}
+                setAces={setAces}
+                setTwos={setTwos}
+                setThrees={setThrees}
+                setFours={setFours}
+                setFives={setFives}
+                setSixes={setSixes}
+                altPair={altPair}
+                twoPairs={twoPairs}
+                triple={triple}
+                fourOfaKind={fourOfaKind}
+                fullHouse={fullHouse}
+                chance={chance}
+                yatzy={yatzy}
+                setScoreDivUnactive={setScoreDivUnactive}
+                bonus={bonus}
+                firstTotal={firstTotal}
+                handleScoreVisibility={handleScoreVisibility}
+                handleTurnChange={handleTurnChange}
+                turn={turn}
+                config={config}
+                setRoll={setRoll}
+                calculateSum={calculateSum}
+                setDices={setDices}
+                setaltPair={setaltPair}
+                finalTotal={finalTotal}
+                handleDiceVisibility={handleDiceVisibility}
+                roll={roll}
+                diceRoll={diceRoll}
+                showRollIcons={showRollIcons}
+                keepDiceAction={keepDiceAction}
+                diceImages={diceImages}
+                dices={dices}
+                smallStraight={smallStraight}
+                bigStraight={bigStraight}
+                setTwoPairs={setTwoPairs}
+                setTriple={setTriple}
+                setFourOfaKind={setFourOfaKind}
+                setBigStraight={setBigStraight}
+                setFullHouse={setFullHouse}
+                setChance={setChance}
+                setYatzy={setYatzy}
+                setSmallStraight={setSmallStraight}
+              />
             }
           />
         </Routes>

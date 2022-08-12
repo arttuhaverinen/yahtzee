@@ -43,6 +43,11 @@ button {
   grid-area: "Score";
 }
 
+.Score-unclickable {
+  grid-area: "Score";
+  pointer-events: none;
+}
+
 .scoreDiv {
   padding-bottom: 0.2rem;
   padding-top: 0.2rem;
@@ -116,6 +121,16 @@ button {
   text-align: center;
   height: 100%;
   gap: 2%;
+}
+
+.Dices-unclickable {
+  background-color: blanchedalmond;
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  height: 100%;
+  gap: 2%;
+  pointer-events: none;
 }
 
 .Dices button {
