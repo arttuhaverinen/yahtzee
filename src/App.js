@@ -43,6 +43,22 @@ function App() {
   const [disableScoreDivP1, setDisableScoreDivP1] = useState(true);
   const [disableScoreDivP2, setDisableScoreDivP2] = useState(true);
 
+  useEffect(() => {
+    if (socket !== null) {
+      socket.on("success", (data, player) => {
+        alert(data);
+        if (player === 1) {
+          setMultiplayerPlayer1(true);
+          setMultiplayerPlayer2(false);
+        } else if (player === 2) {
+          setMultiplayerPlayer2(true);
+          setMultiplayerPlayer1(false);
+        }
+      });
+    }
+  }, [socket]);
+
+  /*
   const [turn, setTurn] = useState(1);
   const [roll, setRoll] = useState(0);
 
@@ -415,7 +431,7 @@ function App() {
   ////////////////////////////////////////////////////////////////////////////////////////////////
 
   const isTwoPairs = () => {
-    //console.log("ispair", dices);
+    console.log("pair", dices);
     let counter = 0;
     let pairs1 = [0, 0];
     let pairs2 = [0, 0];
@@ -800,9 +816,9 @@ function App() {
         p1ScoreDivs[i].classList.add("scoreDivUnactive");
       }
     }
-    */
+    
   };
-
+  
   const handleScoreVisibility = () => {
     if (multiplayerPlayer1 && turn === 1) {
       return "Score";
@@ -876,10 +892,9 @@ function App() {
     if (!(fullHouse.lockedP1 && fullHouse.lockedP2)) isFullHouse();
     if (!(chance.lockedP1 && fullHouse.lockedP2)) isChance();
   };
-
+  */
   return (
     <Router>
-      {console.log("bonus", bonus)}
       <div className="App">
         <NavBar />
         {/*
@@ -894,121 +909,11 @@ function App() {
         <br></br>
         roll {roll} */}
         <Routes>
-          {console.log("location ", window.location.pathname)}
           <Route path="/" element={<MainMenu />} />
           <Route path="/online-menu" element={<OnlineMenu roomName={roomName} setRoomName={setRoomName} username={username} setUsername={setUserName} socket={socket} setSocket={setSocket} />} />
           <Route path="/searching-menu" element={<SearchingMenu />} />
-          <Route
-            path="/game"
-            element={
-              <Game
-                aces={aces}
-                twos={twos}
-                threes={threes}
-                fours={fours}
-                fives={fives}
-                sixes={sixes}
-                setAces={setAces}
-                setTwos={setTwos}
-                setThrees={setThrees}
-                setFours={setFours}
-                setFives={setFives}
-                setSixes={setSixes}
-                altPair={altPair}
-                twoPairs={twoPairs}
-                triple={triple}
-                fourOfaKind={fourOfaKind}
-                fullHouse={fullHouse}
-                chance={chance}
-                yatzy={yatzy}
-                setScoreDivUnactive={setScoreDivUnactive}
-                bonus={bonus}
-                setBonus={setBonus}
-                firstTotal={firstTotal}
-                handleScoreVisibility={handleScoreVisibility}
-                handleTurnChange={handleTurnChange}
-                turn={turn}
-                config={config}
-                setRoll={setRoll}
-                calculateSum={calculateSum}
-                setDices={setDices}
-                setaltPair={setaltPair}
-                finalTotal={finalTotal}
-                handleDiceVisibility={handleDiceVisibility}
-                roll={roll}
-                diceRoll={diceRoll}
-                showRollIcons={showRollIcons}
-                keepDiceAction={keepDiceAction}
-                diceImages={diceImages}
-                dices={dices}
-                smallStraight={smallStraight}
-                bigStraight={bigStraight}
-                setTwoPairs={setTwoPairs}
-                setTriple={setTriple}
-                setFourOfaKind={setFourOfaKind}
-                setBigStraight={setBigStraight}
-                setFullHouse={setFullHouse}
-                setChance={setChance}
-                setYatzy={setYatzy}
-                setSmallStraight={setSmallStraight}
-              />
-            }
-          />
-          <Route
-            path="/mp-game"
-            element={
-              <MultiplayerGame
-                aces={aces}
-                twos={twos}
-                threes={threes}
-                fours={fours}
-                fives={fives}
-                sixes={sixes}
-                setAces={setAces}
-                setTwos={setTwos}
-                setThrees={setThrees}
-                setFours={setFours}
-                setFives={setFives}
-                setSixes={setSixes}
-                altPair={altPair}
-                twoPairs={twoPairs}
-                triple={triple}
-                fourOfaKind={fourOfaKind}
-                fullHouse={fullHouse}
-                chance={chance}
-                yatzy={yatzy}
-                setScoreDivUnactive={setScoreDivUnactive}
-                bonus={bonus}
-                firstTotal={firstTotal}
-                handleScoreVisibility={handleScoreVisibility}
-                handleTurnChange={handleTurnChange}
-                turn={turn}
-                config={config}
-                setRoll={setRoll}
-                calculateSum={calculateSum}
-                setDices={setDices}
-                setaltPair={setaltPair}
-                finalTotal={finalTotal}
-                handleDiceVisibility={handleDiceVisibility}
-                roll={roll}
-                diceRoll={diceRoll}
-                showRollIcons={showRollIcons}
-                keepDiceAction={keepDiceAction}
-                diceImages={diceImages}
-                dices={dices}
-                smallStraight={smallStraight}
-                bigStraight={bigStraight}
-                setTwoPairs={setTwoPairs}
-                setTriple={setTriple}
-                setFourOfaKind={setFourOfaKind}
-                setBigStraight={setBigStraight}
-                setFullHouse={setFullHouse}
-                setChance={setChance}
-                setYatzy={setYatzy}
-                setSmallStraight={setSmallStraight}
-              />
-            }
-          />
+          <Route path="/game" element={<Game config={config} />} />
+          <Route path="/mp-game" element={<MultiplayerGame multiplayerPlayer1={multiplayerPlayer1} setMultiplayerPlayer1={setMultiplayerPlayer1} multiplayerPlayer2={multiplayerPlayer2} setMultiplayerPlayer2={multiplayerPlayer2} socket={socket} setSocket={setSocket} roomName={roomName} config={config} username={username} />} />
         </Routes>
       </div>
       <Footer />

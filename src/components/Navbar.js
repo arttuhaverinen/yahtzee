@@ -1,9 +1,14 @@
+import { Link } from "react-router-dom";
+
 const NavBar = () => {
   return (
     <div className="Navbar">
-      <ul>
+      <h1>
+        <Link to="/">Yahtzee</Link>
+      </h1>
+      {/*<ul>
         <li>
-          <a href="#home">Yatzy</a>
+          <Link to="/">Yahtzee</Link>
         </li>
         <li>
           <a href="#news">d</a>
@@ -14,7 +19,7 @@ const NavBar = () => {
         <li>
           <a href="#about">About</a>
         </li>
-      </ul>
+      </ul>*/}
     </div>
   );
 };

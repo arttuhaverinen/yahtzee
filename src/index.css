@@ -9,14 +9,17 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background-color: rgb(33, 33, 33);
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
+  /*font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
+  */
 }
 
 a {
   text-decoration: none;
+  color: white;
 }
 
 button {
@@ -25,18 +28,54 @@ button {
 
 .pageGrid {
   display: grid;
-  grid-template-areas: "Score Dices";
+  grid-template-areas:
+    "Info Info"
+    "Score Dices";
+  grid-template-rows: 0.1fr 0.7fr;
   grid-template-columns: 0.5fr 0.5fr;
+  gap: 3%;
 }
 
 .container {
+  padding-top: 1%;
   padding-left: 5%;
   padding-right: 5%;
-  padding-top: 5%;
   width: 60%;
   margin: auto;
   background-color: #f8f4ef;
   min-height: 100vh;
+  background-image: url("./images/wood.jpg");
+  background-size: cover;
+}
+
+.div-playerinfo {
+  display: flex;
+  align-items: center;
+  grid-area: Info;
+  background: #35654d;
+  color: rgba(255, 255, 255, 0.9);
+  border: 2px solid black;
+  padding-top: 1%;
+  padding-bottom: 1%;
+  padding-left: 2%;
+  padding-right: 2%;
+  border-radius: 5px;
+  flex-wrap: wrap;
+}
+
+.div-playerinfo h1 {
+  text-align: center;
+  width: 32%;
+  overflow: hidden;
+}
+
+.div-playerinfo .h1-left {
+  flex-grow: 1;
+  margin-top: 1%;
+  width: 100%;
+  text-align: center;
+  color: rgba(255, 255, 255, 1);
+  font-weight: 900;
 }
 
 .Score {
@@ -54,7 +93,9 @@ button {
   margin-bottom: 0.2rem;
   display: flex;
   justify-content: space-between;
-  background-color: gainsboro;
+  background-color: #35654d;
+  color: rgba(255, 255, 255, 0.9);
+  border-radius: 2px;
 }
 
 .scoreDiv > h3 {
@@ -67,12 +108,17 @@ button {
 
 .scoreDiv h3 {
   text-align: left;
-  margin-left: 1rem;
+  margin-left: 2%;
+  margin-right: 2%;
 }
 
 .scoreDivP1 {
-  margin-right: 5px;
+  display: flex;
   width: 100%;
+}
+
+.scoreDivP1 {
+  margin-left: 3%;
 }
 
 .scoreDivP1Unactive {
@@ -82,17 +128,28 @@ button {
 
 .scoreDivP1 > button {
   width: 40%;
-  border: none;
+  border: 1px solid black;
   border-radius: 2px;
-  margin-right: 2px;
+  background: #2a513e;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: medium;
+  font-weight: 800;
 }
 
 .scoreDivP2 {
+  display: flex;
   width: 100%;
+  margin-left: 1%;
 }
 
 .scoreDivP2 > button {
-  width: 50%;
+  width: 40%;
+  border: 1px solid black;
+  border-radius: 2px;
+  background: #2a513e;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: medium;
+  font-weight: 800;
 }
 
 .scoreDiv div button {
@@ -103,9 +160,8 @@ button {
 }
 
 .scoreDivUnactive {
-  color: red;
+  color: rgba(255, 255, 255, 0.9);
   pointer-events: none;
-  background-color: rgba(220, 220, 220, 0.2);
   opacity: 0.3;
 }
 
@@ -115,16 +171,43 @@ button {
 
 /* dice div */
 
+.btn-roll {
+  display: flex;
+  background: #2a513e;
+  color: rgba(255, 255, 255, 0.9);
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 5%;
+  padding: 2%;
+  border-radius: 5px;
+  width: 90%;
+  min-height: 15%;
+}
+
+.btn-roll span {
+}
+
+.btn-roll span svg {
+  font-size: x-large;
+}
+
+.btn-roll:hover {
+  color: rgba(255, 255, 255, 1);
+}
+
 .Dices {
+  grid-area: Dices;
   display: flex;
   flex-direction: column;
   text-align: center;
   height: 100%;
   gap: 2%;
+  background: #35654d;
+  border: 2px solid black;
+  border-radius: 5px;
 }
 
 .Dices-unclickable {
-  background-color: blanchedalmond;
   display: flex;
   flex-direction: column;
   text-align: center;
@@ -138,8 +221,24 @@ button {
   padding-right: 5%;
   text-align: left;
   align-self: center;
-  width: 75%;
-  height: 7%;
+}
+
+.btn-leavegame {
+  width: 90%;
+  margin-top: auto;
+  margin-bottom: 5%;
+  color: rgba(255, 255, 255, 0.9);
+  background: #2a513e;
+  padding: 5%;
+  font-size: x-large;
+  border-radius: 5px;
+  text-align: center;
+  pointer-events: all;
+}
+
+.btn-mobile-leave {
+  display: none;
+  pointer-events: all;
 }
 
 .Dices img {
@@ -155,6 +254,47 @@ button {
   margin-top: auto;
 }
 
+.div-winner {
+  grid-area: Dices;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+
+  width: 80%;
+  margin: 0 auto;
+
+  background: #35654d;
+  border: 2px solid gold;
+}
+
+.div-winner h1 {
+  margin-bottom: 20%;
+  color: white;
+}
+
+.div-winner svg {
+  font-size: 100px;
+  color: gold;
+  margin: 5%;
+}
+
+.div-winner button {
+  width: 90%;
+  margin-top: auto;
+  margin-bottom: 5%;
+  color: rgba(255, 255, 255, 0.9);
+  background: #2a513e;
+  padding: 5%;
+  font-size: x-large;
+
+  border-radius: 5px;
+}
+
+.div-winner button:hover {
+  color: rgba(255, 255, 255, 1);
+}
+
 /* Menu page */
 
 .div-main-menu {
@@ -165,11 +305,63 @@ button {
 }
 
 .div-main-menu a {
+  color: rgba(255, 255, 255, 0.8);
   width: 50%;
   margin-top: 5%;
   padding: 1%;
   font-size: xx-large;
   border: 1px solid black;
+  background: #2a513e;
+  border-radius: 5px;
+}
+
+.div-main-menu a:hover {
+  color: rgba(255, 255, 255, 1);
+}
+
+.div-join-online-form {
+  display: flex;
+  flex-flow: wrap;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding-top: 5%;
+  padding-bottom: 5%;
+  color: rgba(255, 255, 255, 0.8);
+  background: #35654d;
+  border-radius: 5px;
+  min-height: 50vh;
+  width: 80%;
+}
+
+.div-join-online-form a {
+  color: rgba(255, 255, 255, 0.8);
+  width: 50%;
+  margin-top: 5%;
+  padding: 1%;
+}
+.div-join-online-form h1 {
+  color: rgba(255, 255, 255, 0.8);
+  width: 50%;
+  margin-top: 5%;
+  padding: 1%;
+}
+
+.h1-hidden {
+  margin-top: 5%;
+  padding: 1%;
+  width: 50%;
+  visibility: hidden;
+}
+
+.div-join-online-form h1 {
+  margin-top: 5%;
+  padding: 1%;
+  width: 50%;
+}
+
+.a-return-main {
+  color: red;
 }
 
 /* Navbar */
@@ -179,6 +371,27 @@ button {
   display: flex;
   align-items: center;
   background-color: black;
+  border-bottom-width: 2px;
+  border-bottom-style: solid;
+  border-image: linear-gradient(45deg, hsla(28, 100%, 74%, 0.5), rgb(168, 152, 63), hsla(28, 100%, 74%, 0.5)) 1;
+}
+
+.Navbar h1 {
+  margin-top: 1%;
+  margin-bottom: 1%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.Navbar a {
+  background: radial-gradient(at 40% 20%, hsla(28, 100%, 74%, 1) 0px, transparent 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: #fff;
+  font-family: "Playfair Display", serif;
+  position: relative;
+  text-transform: uppercase;
+  font-weight: 400;
 }
 
 .Navbar ul {
@@ -218,4 +431,62 @@ button {
   margin-top: 2%;
   margin-bottom: 2%;
   width: 80%;
+}
+
+@media only screen and (max-width: 1200px) {
+  .container {
+    width: 90%;
+  }
+}
+
+@media only screen and (max-width: 768px) {
+  .pageGrid {
+    display: grid;
+    grid-template-areas:
+      "Info"
+      "Dices"
+      "Score";
+    grid-template-rows: 0.2fr 0.4fr 0.4fr;
+    grid-template-columns: 1fr;
+    gap: 1%;
+  }
+
+  .container {
+    width: 90%;
+  }
+
+  .btn-leavegame {
+    display: none;
+  }
+
+  .btn-roll {
+    height: 40%;
+    margin-bottom: 2%;
+  }
+
+  .scoreDiv button {
+    margin: 2%;
+  }
+
+  .div-playerinfo {
+    font-size: x-small;
+  }
+
+  .btn-mobile-leave {
+    display: block;
+    width: 100%;
+    height: 20%;
+    color: white;
+    background: #2a513e;
+    margin-top: auto;
+    margin-bottom: 5%;
+    border-radius: 5px;
+    font-size: large;
+    border: 2px solid black;
+  }
+
+  .Footer {
+    display: flex;
+    flex-direction: column;
+  }
 }
