@@ -1,19 +1,31 @@
+const dotenv = require("dotenv").config();
+
 const express = require("express");
 const cors = require("cors");
 const app = express();
 const path = require("path");
 app.use(cors({ origin: "*" }));
-app.use(express.static("public"));
 const server = require("http").createServer(app);
 const io = require("socket.io")(server, { cors: { origin: "*" } });
 
-app.get("/", (req, res) => {
-  res.render("/index.html");
-});
+if (process.env.NODE_ENV === "development") {
+  app.get("/", (req, res) => {
+    console.log("development");
+    res.json("development");
+  });
+}
+
+if (process.env.NODE_ENV === "production") {
+  app.use(express.static(path.join(__dirname, "../build")));
+  app.get("/", (req, res) => {
+    console.log("/");
+    res.sendFile(path.resolve(__dirname, "build", "index.html"));
+  });
+}
 
 app.post("/join-online", (req, res) => {
   console.log(req.body);
-  res.json("ok");
+  res.json(process.env.NODE_ENV);
 });
 
 server.listen(3001, () => {
